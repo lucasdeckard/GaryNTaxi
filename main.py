@@ -1,17 +1,21 @@
 import pygame, sys
 from random import randint
+from pytmx.util_pygame import load_pygame
 
 class Tree(pygame.sprite.Sprite):
     def __init__(self,pos,group):
         super().__init__(group)
-        self.image = pygame.image.load('sidescrollproject/assets/tree.png').convert_alpha()
+        self.image1 = pygame.image.load('sidescrollproject/assets/mmitch.png').convert_alpha()
+        self.image = pygame.transform.scale(self.image1, (32,32))
         self.rect = self.image.get_rect(topleft = pos)
 
 class Player(pygame.sprite.Sprite):
     def __init__(self,pos,group):
         super().__init__(group)
-        self.image = pygame.image.load('sidescrollproject/assets/garypixel.png').convert_alpha()
-        self.rect = self.image.get_rect(center = pos)
+        self.angle = 0
+        self.image = pygame.image.load('sidescrollproject/assets/taxip.png').convert_alpha()
+        self.image1 = pygame.transform.scale(self.image, (32,32))
+        self.rect = self.image1.get_rect(center = pos)
         self.direction = pygame.math.Vector2()
         self.speed = 5
 
@@ -21,21 +25,28 @@ class Player(pygame.sprite.Sprite):
 
         if keys[pygame.K_UP]:
             self.direction.y = -1
+            self.angle = 0
         elif keys[pygame.K_DOWN]:
             self.direction.y = 1
+            self.angle = 180
         else:
             self.direction.y = 0
 
         if keys[pygame.K_RIGHT]:
             self.direction.x = 1
+            self.angle = 270
         elif keys[pygame.K_LEFT]:
             self.direction.x = -1
+            self.angle = 90
         else:
             self.direction.x = 0
 
     def update(self):
-        self.input()
-        self.rect.center += self.direction * self.speed
+         self.input()
+         self.rect.center += self.direction * self.speed
+         self.image = pygame.transform.rotate(self.image1, self.angle)
+         self.rect = self.image.get_rect(center = self.rect.center)
+        
 
 class CameraGroup(pygame.sprite.Group):
     def __init__(self):
@@ -48,7 +59,8 @@ class CameraGroup(pygame.sprite.Group):
         self.half_h = self.display_surface.get_size()[1] // 2
 
         # ground
-        self.ground_surf = pygame.image.load('sidescrollproject/assets/ground (1).png').convert_alpha()
+        
+        self.ground_surf = pygame.image.load('sidescrollproject/assets/taximap.png').convert_alpha()
         self.ground_rect = self.ground_surf.get_rect(topleft = (0,0))
  
     def center_target_camera(self, target):
@@ -78,10 +90,7 @@ clock = pygame.time.Clock()
 camera_group = CameraGroup()
 player = Player((640,360),camera_group)
 
-for i in range(20):
-    random_x = randint(1000, 2000)
-    random_y = randint(1000, 2000)
-    Tree((random_x,random_y),camera_group)
+Tree((1500, 200), camera_group)
 
 while True:
     for event in pygame.event.get():
@@ -93,7 +102,7 @@ while True:
                 pygame.quit()
                 sys.exit()
 
-    screen.fill('#71ddee')
+    screen.fill('lime')
 
     camera_group.update()
     camera_group.custom_draw(player)
